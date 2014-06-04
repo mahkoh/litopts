@@ -4,12 +4,15 @@
 extern crate litopts_mac;
 extern crate litopts;
 
-use litopts::{OptFlag, OptOptOpt, OptLongFlag, OptFree};
+use litopts::{OptFlag, OptOptOpt, OptLongFlag, OptFree, OptUnknown};
 
 #[deriving(PartialEq, Eq)]
 enum ColorMode {
+    /// Never write colored text.
     Never,
+    /// Always write colored text.
     Always,
+    /// Write colored text if the output is a terminal.
     Auto,
 }
 
@@ -28,18 +31,21 @@ fn main() {
     let args = std::os::args_as_bytes();
     for o in OPTS.getopts(args.tail()) {
         match o.var {
+            // Re-enable a previously disabled short mode.
             OptFlag('s') => short_mode = true,
             OptFlag('l') => short_mode = false,
             OptOptOpt('c', v) => {
+                // Since the argument is optional, v in an Option<&[u8]>.
                 match v {
                     Some(v) => match std::str::from_utf8(v) {
                         Some("never")  => color_mode = Never,
                         Some("always") => color_mode = Always,
                         Some("auto")   => color_mode = Auto,
                         _ => {
+                            // o.real contains the string the option was activated with.
                             (writeln!(std::io::stderr(),
-                                "Argument `{0}` has to be of the form `{0}`, \
-                                 `{0}=never`, `{0}=always`, or `{0}=auto`.",
+                                "Argument `{0}` takes no argument or one of the \
+                                 arguments `never`, `always`, or `auto`.",
                                  o.real)).unwrap();
                             std::os::set_exit_status(1);
                             return;
@@ -53,6 +59,8 @@ fn main() {
                 return;
             },
             OptFree(v) => free.push(v),
+            OptUnknown(_) => { /* ignore this for now */ },
+            // The other variants cannot appear.
             _ => unreachable!(),
         }
     }
