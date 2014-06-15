@@ -1,6 +1,6 @@
 #![feature(phase)]
 
-#[phase(syntax)]
+#[phase(plugin)]
 extern crate litopts_mac;
 extern crate litopts;
 

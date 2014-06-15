@@ -1,27 +1,30 @@
 #![crate_id="litopts_mac"]
 #![crate_type="dylib"]
-#![feature(managed_boxes, phase, macro_registrar, quote, macro_rules)]
+#![feature(managed_boxes, phase, plugin_registrar, quote, macro_rules)]
 
 extern crate syntax;
 extern crate debug;
 extern crate litopts;
+extern crate rustc;
 
 use litopts::{LitOptFlag, LitOptOpt, LitOptOptOpt, OptType};
 
 use std::string::{String};
+use std::gc::{GC};
+
+use rustc::plugin::{Registry};
 
 use syntax::{ast};
-use syntax::ast::{Name, TokenTree, LitStr, Expr, ExprVec, ExprLit};
+use syntax::ast::{TokenTree, LitStr, Expr, ExprVec, ExprLit};
 use syntax::codemap::{Span, Pos};
-use syntax::ext::base::{SyntaxExtension, DummyResult, ExtCtxt, MacResult, MacExpr,
-                        NormalTT, BasicMacroExpander};
-use syntax::parse::{token, new_parser_from_tts};
+use syntax::ext::base::{DummyResult, ExtCtxt, MacResult, MacExpr};
+                        
+use syntax::parse::{new_parser_from_tts};
 use syntax::parse::token::{InternedString, COMMA, EOF};
 
-#[macro_registrar]
-pub fn macro_registrar(register: |Name, SyntaxExtension|) {
-    let bme = box BasicMacroExpander { expander: expand_opts, span: None };
-    register(token::intern("litopts"), NormalTT(bme, None));
+#[plugin_registrar]
+pub fn plugin_registrar(reg: &mut Registry) {
+    reg.register_macro("litopts", expand_opts);
 }
 
 fn parse_macro(cx: &mut ExtCtxt,
@@ -306,6 +309,6 @@ fn expand_opts(cx: &mut ExtCtxt, sp: Span, tts: &[TokenTree]) -> Box<MacResult> 
         opts.push(quote_expr!(cx, ::litopts::Opt { short:$short, short_str:$short_str,
                                                    long:$long, ty:$ty }));
     }
-    let opts = @Expr { id: ast::DUMMY_NODE_ID, node: ExprVec(opts), span: sp };
+    let opts = box(GC) Expr { id: ast::DUMMY_NODE_ID, node: ExprVec(opts), span: sp };
     MacExpr::new(quote_expr!(cx, ::litopts::Opts { opts: $opts }))
 }
