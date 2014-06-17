@@ -27,11 +27,22 @@ impl Opt {
             res.push_char(self.short.unwrap());
             if self.long.is_some() {
                 res.push_str(", ");
+            } else {
+                match self.ty {
+                    LitOptOpt => res.push_str(format!(" <{}>", self.para).as_slice()),
+                    LitOptOptOpt => res.push_str(format!("[{}]", self.para).as_slice()),
+                    _ => { }
+                }
             }
         }
         if self.long.is_some() {
             res.push_str("--");
             res.push_str(self.long.unwrap());
+            match self.ty {
+                LitOptOpt => res.push_str(format!("={}", self.para).as_slice()),
+                LitOptOptOpt => res.push_str(format!("[={}]", self.para).as_slice()),
+                _ => { }
+            }
         }
         res
     }
