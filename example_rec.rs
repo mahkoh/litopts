@@ -4,7 +4,7 @@
 extern crate litopts_mac;
 extern crate litopts;
 
-use litopts::{OptFlag, OptOptOpt, OptLongFlag, OptFree, OptUnknown};
+use litopts::{OptUnknown};
 
 #[deriving(PartialEq, Eq)]
 enum ColorMode {
@@ -32,17 +32,24 @@ fn main() {
 
     let mut color_mode = Never;
     let mut short_mode = true;
-    let mut free = Vec::new();
 
     let args = std::os::args_as_bytes();
-    for o in OPTS.getopts(args.tail()) {
-        match o.var {
-            // Re-enable a previously disabled short mode.
-            OptFlag('s') => short_mode = true,
-            OptFlag('l') => short_mode = false,
-            OptOptOpt('c', v) => {
-                // Since the argument is optional, v in an Option<&[u8]>.
-                match v {
+    let rec = match OPTS.record(args.tail()) {
+        Ok(r) => r,
+        Err(o) => match o.var {
+            OptUnknown(o) => {
+                println!("Unknown option {}", o);
+                return;
+            },
+            _ => unreachable!(),
+        },
+    };
+    for o in rec.res.iter() {
+        match o.as_str {
+            "s" => short_mode = true,
+            "l" => short_mode = false,
+            "c" => {
+                match o.var.get_val_opt() {
                     Some(v) => match std::str::from_utf8(v) {
                         Some("never")  => color_mode = Never,
                         Some("always") => color_mode = Always,
@@ -60,18 +67,15 @@ fn main() {
                     None => color_mode = Always,
                 }
             },
-            OptLongFlag("help") => {
+            "help" => {
                 println!("USAGE:");
                 print!("{}", OPTS.gahnoo_help());
                 return;
             },
-            OptLongFlag("version") => {
+            "version" => {
                 println!("1.0.0");
                 return;
             },
-            OptFree(v) => free.push(v),
-            OptUnknown(_) => { /* ignore this for now */ },
-            // The other variants cannot appear.
             _ => unreachable!(),
         }
     }
@@ -79,7 +83,7 @@ fn main() {
     let mut stdout = std::io::stdio::stdout_raw();
     let colorize = (color_mode == Always) || (color_mode == Auto && stdout.isatty());
 
-    for &f in free.iter() {
+    for &f in rec.free.iter() {
         if short_mode {
             stdout.write_str("o: ").unwrap();
         } else {
