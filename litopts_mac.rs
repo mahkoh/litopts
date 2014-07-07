@@ -133,11 +133,12 @@ fn parse_opt(cx: &mut ExtCtxt, opt: &str, help: String,
     let mut para_end = None;
     let mut ty = LitOptFlag;
     let mut pos = range(0, opt.len());
+    let bytes = opt.as_bytes();
     macro_rules! consume {
         () => {
             match pos.next() {
-                Some(i) => if opt[i] < 128 {
-                    opt[i] as char
+                Some(i) => if bytes[i] < 128 {
+                    bytes[i] as char
                 } else {
                     err!(i, r"expected Ascii");
                 },
@@ -147,12 +148,12 @@ fn parse_opt(cx: &mut ExtCtxt, opt: &str, help: String,
     };
     loop {
         let (i, c) = match pos.next() {
-            Some(i) => if opt[i] < 128 {
-                (i, opt[i] as char)
+            Some(i) => if bytes[i] < 128 {
+                (i, bytes[i] as char)
             } else {
                 err!(i, r"expected Ascii");
             },
-            None    => (opt.len(), '☺'),
+            None    => (bytes.len(), '☺'),
         };
         match state {
             SStart => {
