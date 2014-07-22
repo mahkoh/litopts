@@ -1,4 +1,4 @@
-#![crate_id="litopts_mac"]
+#![crate_name="litopts_mac"]
 #![crate_type="dylib"]
 #![feature(managed_boxes, phase, plugin_registrar, quote, macro_rules)]
 

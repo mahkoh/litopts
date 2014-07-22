@@ -1,4 +1,4 @@
-#![crate_id="litopts"]
+#![crate_name="litopts"]
 #![crate_type="lib"]
 #![feature(macro_rules)]
 
@@ -214,7 +214,7 @@ impl<'a> Iterator<OptRes<'a>> for OptsIter<'a> {
         }
         if self.subpos.is_some() {
             let subpos = self.subpos.unwrap();
-            let arg = *self.args[self.pos].get(subpos) as char;
+            let arg = self.args[self.pos][subpos] as char;
             match self.opts.opts.iter().find(|f| f.short == Some(arg)) {
                 Some(o) => {
                     macro_rules! ret {
@@ -256,14 +256,14 @@ impl<'a> Iterator<OptRes<'a>> for OptsIter<'a> {
             }
         }
         let arg = &self.args[self.pos];
-        if self.only_free || arg.len() < 2 || *arg.get(0) != '-' as u8 {
+        if self.only_free || arg.len() < 2 || arg[0] != '-' as u8 {
             self.pos += 1;
             if self.posix {
                 self.only_free = true;
             }
             return Some(OptRes { real: "", as_str: "", var: OptFree(arg.as_slice()) });
         }
-        if arg.len() >= 2 && *arg.get(1) == '-' as u8 {
+        if arg.len() >= 2 && arg[1] == '-' as u8 {
             if arg.len() == 2 {
                 self.pos += 1;
                 self.only_free = true;
@@ -340,7 +340,7 @@ impl<'a> Iterator<OptRes<'a>> for OptsIter<'a> {
                 },
             }
         }
-        if self.opts.opts.iter().any(|o| o.short == Some(*arg.get(1) as char)) {
+        if self.opts.opts.iter().any(|o| o.short == Some(arg[1] as char)) {
             self.subpos = Some(1);
             return self.next();
         }
