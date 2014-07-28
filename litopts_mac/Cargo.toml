@@ -1,0 +1,11 @@
+[package]
+name = "litopts_mac"
+version = "0.1.0"
+authors = [ "mahkoh" ]
+
+[[lib]]
+name = "litopts_mac"
+path = "src/litopts_mac.rs"
+
+[dependencies.litopts]
+git = "https://github.com/mahkoh/litopts.git"

@@ -1,0 +1,8 @@
+[package]
+name = "litopts"
+version = "0.1.0"
+authors = [ "mahkoh" ]
+
+[[lib]]
+name = "litopts"
+path = "src/litopts.rs"
