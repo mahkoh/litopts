@@ -1,0 +1,4 @@
+.*
+!.gitignore
+litopts/target
+litopts_mac/target

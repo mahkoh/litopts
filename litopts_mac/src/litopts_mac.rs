@@ -18,6 +18,7 @@ use syntax::{ast};
 use syntax::ast::{TokenTree, LitStr, Expr, ExprVec, ExprLit, MetaNameValue};
 use syntax::codemap::{Span, Pos};
 use syntax::ext::base::{DummyResult, ExtCtxt, MacResult, MacExpr};
+use syntax::fold::{Folder};
                         
 use syntax::parse::{new_parser_from_tts};
 use syntax::parse::attr::{ParserAttr};
@@ -65,7 +66,7 @@ fn parse_macro(cx: &mut ExtCtxt,
                 _ => break,
             };
         }
-        let row = cx.expand_expr(parser.parse_expr());
+        let row = cx.expander().fold_expr(parser.parse_expr());
         let row_str = match row.node {
             ExprLit(lit) => match lit.node {
                 LitStr(ref s, _) => Some(s.clone()),
