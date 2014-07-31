@@ -6,7 +6,7 @@ authors = [ "mahkoh" ]
 [[lib]]
 name = "litopts_mac"
 path = "src/litopts_mac.rs"
-crate-types = ["dylib"]
+plugin = true
 
 [dependencies.litopts]
 git = "https://github.com/mahkoh/litopts.git"
