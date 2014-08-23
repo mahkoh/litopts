@@ -3,7 +3,7 @@ name = "litopts_mac"
 version = "0.1.0"
 authors = [ "mahkoh" ]
 
-[[lib]]
+[lib]
 name = "litopts_mac"
 path = "src/litopts_mac.rs"
 plugin = true

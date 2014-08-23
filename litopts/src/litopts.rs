@@ -232,13 +232,13 @@ impl<'a> Iterator<OptRes<'a>> for OptsIter<'a> {
                     self.pos += 1;
                     if o.ty == LitOptOptOpt {
                         if subpos + 1 < self.args[self.pos - 1].len() {
-                            let val = self.args[self.pos - 1].tailn(subpos + 1);
+                            let val = self.args[self.pos - 1].slice_from(subpos + 1);
                             ret!(OptOptOpt(arg, Some(val)));
                         }
                         ret!(OptOptOpt(arg, None));
                     }
                     if subpos + 1 < self.args[self.pos - 1].len() {
-                        let val = self.args[self.pos - 1].tailn(subpos + 1);
+                        let val = self.args[self.pos - 1].slice_from(subpos + 1);
                         ret!(OptOpt(arg, val));
                     }
                     if self.pos < self.args.len() {
@@ -271,7 +271,7 @@ impl<'a> Iterator<OptRes<'a>> for OptsIter<'a> {
             }
             let (arg_s, p) = match arg.iter().position(|&c| c == '=' as u8) {
                 Some(p) => (arg.slice(2, p), Some(p)),
-                None => (arg.tailn(2), None),
+                None => (arg.slice_from(2), None),
             };
             match self.opts.opts.iter().filter(|o| o.long.is_some())
                                        .find(|o| o.long.unwrap().as_bytes() == arg_s) {

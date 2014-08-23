@@ -3,6 +3,6 @@ name = "litopts"
 version = "0.1.0"
 authors = [ "mahkoh" ]
 
-[[lib]]
+[lib]
 name = "litopts"
 path = "src/litopts.rs"
