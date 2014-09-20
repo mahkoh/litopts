@@ -10,11 +10,10 @@ extern crate rustc;
 use litopts::{LitOptFlag, LitOptOpt, LitOptOptOpt, OptType};
 
 use std::string::{String};
-use std::gc::{GC};
 
 use rustc::plugin::{Registry};
 
-use syntax::{ast};
+use syntax::{ptr, ast};
 use syntax::ast::{TokenTree, LitStr, Expr, ExprVec, ExprLit, MetaNameValue};
 use syntax::codemap::{Span, Pos};
 use syntax::ext::base::{DummyResult, ExtCtxt, MacResult, MacExpr};
@@ -68,7 +67,7 @@ fn parse_macro(cx: &mut ExtCtxt,
         }
         let row = cx.expander().fold_expr(parser.parse_expr());
         let row_str = match row.node {
-            ExprLit(lit) => match lit.node {
+            ExprLit(ref lit) => match lit.node {
                 LitStr(ref s, _) => Some(s.clone()),
                 _ => None,
             },
@@ -315,14 +314,14 @@ fn parse_opt(cx: &mut ExtCtxt, opt: &str, help: String,
     })
 }
 
-fn expand_opts(cx: &mut ExtCtxt, sp: Span, tts: &[TokenTree]) -> Box<MacResult> {
+fn expand_opts(cx: &mut ExtCtxt, sp: Span, tts: &[TokenTree]) -> Box<MacResult + 'static> {
     let opts = match parse_macro(cx, tts) {
         Some(opts) => opts,
         None => return DummyResult::expr(sp),
     };
     let mut res = Vec::<PreOpt>::new();
     let mut bad = false;
-    for (opt_str, help, opt_span) in opts.move_iter() {
+    for (opt_str, help, opt_span) in opts.into_iter() {
         match parse_opt(cx, opt_str.get(), help, opt_span) {
             Some(o) => {
                 if o.short.is_some() && res.iter().any(|u| u.short == o.short) {
@@ -384,6 +383,6 @@ fn expand_opts(cx: &mut ExtCtxt, sp: Span, tts: &[TokenTree]) -> Box<MacResult> 
                                                    long:$long, para:$para, help:$help,
                                                    ty:$ty }));
     }
-    let opts = box(GC) Expr { id: ast::DUMMY_NODE_ID, node: ExprVec(opts), span: sp };
+    let opts = ptr::P(Expr { id: ast::DUMMY_NODE_ID, node: ExprVec(opts), span: sp });
     MacExpr::new(quote_expr!(cx, ::litopts::Opts { opts: $opts }))
 }
